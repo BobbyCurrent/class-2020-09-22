@@ -40,7 +40,10 @@ sep_old <-
          title = course_title,
          name = course_name,
          department = course_department) %>% 
+  group_by(id, title, name, department) %>%
+  summarize(u_grad = sum(u_grad), .groups = "drop") %>%
   filter(u_grad > 10)
+  
 
 # But this is not correct! Look for Gov 50: Data. What do you see? What can you
 # do to clean it up?
@@ -52,6 +55,25 @@ sep_old <-
 ### Scene 1
 
 **Prompt:** Read in and clean the new data, creating an object called `sep_new`. 
+```{r}
+
+sep_new <- 
+  read_excel("new_data/class_enrollment_summary_by_term_9-21-2020.xlsx", 
+             skip = 3) %>% 
+  clean_names() %>% 
+  filter(! is.na(course_title)) %>% 
+  select(-grad, -non_degree, -x_reg, -vus, -employee, 
+         -withdraw, -total, -instructor_full_name, -course_section_code) %>%
+  rename(id = course_id,
+         title = course_title,
+         name = course_name,
+         department = course_department) %>% 
+  group_by(id, title, name, department) %>%
+  summarize(u_grad = sum(u_grad), .groups = "drop") %>%
+  filter(u_grad > 10)
+  
+  
+```
 
 
 
@@ -60,9 +82,17 @@ sep_old <-
 **Prompt:** Dean Amanda Claybaugh is concerned about the drop in undergradaute enrollment in some courses between September 1 and today. She wants you to analyze this issue. Before you dive into the details, provide some bullet points as to how Wisdom and Temperance apply to this situation. Every student should have several bullet points. Someone will be asked to share their screen and discuss.
 
 Before we start on the model, Wisdom suggests we should:
+```{r}
+#"To be wise is to show care and thoughtful discretion with regard for the future."
+#— first define what we want to know. We want to know what the drop in undergraduate enrollment has been between September 1 and today, September 22. We then want to search for reasons for why that drop may have occurred.
+#—Because this is a causal question, we start with the infinite Preceptor's Tables and then must make wise decisions accordingly to manage the amount of data we have access to. We must drop duplicate rows, drop columns we don't care about, and define our estimand in terms of potential outcomes. This will get us started to create the model!
+```
 
 
 After we have a model, Temperance suggests we should:
+```{r}
+#Check our model to make sure that everything we want is included and that we are not leaving out an important peice of data. We should also look at the way the data may changge in the course of the project and ensure that all of the new data is incorporated so that everything is as up to date as possible.
+```
 
 
 
@@ -70,6 +100,10 @@ After we have a model, Temperance suggests we should:
 
 **Prompt:** Which classes had the biggest increases and decreases in undergraduate enrollments between September 1 and today? Make a graphic that shows the 5 biggest increases and decreases. Make it look nice.
 
+```{r Scene 3}
+sep_change <-
+  full_join(sep_old, sep_new, by = c("id", "title", "department", "name"))
+```
 
 
 
